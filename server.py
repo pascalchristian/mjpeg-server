@@ -1,8 +1,12 @@
 #!/usr/bin/python3
 
+# This is the same as mjpeg_server.py, but uses the h/w MJPEG encoder.
 # Mostly copied from https://picamera.readthedocs.io/en/release-1.13/recipes2.html
 # Run this script, then point a web browser at http:<this-ip-address>:8000
 # Note: needs simplejpeg to be installed (pip3 install simplejpeg).
+
+# https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf
+# https://github.com/raspberrypi/picamera2/blob/main/examples/mjpeg_server_2.py
 
 import io
 import logging
@@ -11,7 +15,7 @@ from http import server
 from threading import Condition
 
 from picamera2 import Picamera2
-from picamera2.encoders import JpegEncoder
+from picamera2.encoders import MJPEGEncoder
 from picamera2.outputs import FileOutput
 
 PAGE = """\
@@ -84,9 +88,9 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
 
 
 picam2 = Picamera2()
-picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}, controls={"FrameDurationLimits": (400000, 400000)}))
+picam2.configure(picam2.create_video_configuration(main={"size": (1024, 768)}, controls={"FrameDurationLimits": (500000, 500000)}))
 output = StreamingOutput()
-picam2.start_recording(JpegEncoder(), FileOutput(output))
+picam2.start_recording(MJPEGEncoder(), FileOutput(output))
 
 try:
     address = ('', 8000)
